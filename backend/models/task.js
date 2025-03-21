@@ -30,6 +30,10 @@ module.exports = (sequelize) => {
     Task.hasMany(models.Subtask, {
       foreignKey: 'taskId'
     });
+    Task.belongsToMany(models.Category, {
+      through: 'TaskCategories',
+      foreignKey: 'taskId'
+    });
   };
 
   return Task;
