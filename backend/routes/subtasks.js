@@ -5,8 +5,10 @@ const auth = require('../middleware/auth');
 
 router.use(auth);
 
-router.post('/task/:taskId', subtaskController.createSubtask);
-router.put('/:id/toggle', subtaskController.toggleComplete);
+// Subtask routes
+router.post('/', subtaskController.createSubtask);
+router.get('/task/:taskId', subtaskController.getSubtasksByTaskId);
+router.put('/:id', subtaskController.updateSubtask);
 router.delete('/:id', subtaskController.deleteSubtask);
 
 module.exports = router;

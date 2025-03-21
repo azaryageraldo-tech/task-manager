@@ -14,6 +14,9 @@ const taskRoutes = require('./routes/tasks');
 const notificationRoutes = require('./routes/notifications');
 const subtaskRoutes = require('./routes/subtasks');
 const categoryRoutes = require('./routes/categories');
+const commentRoutes = require('./routes/comments');
+const taskShareRoutes = require('./routes/taskShares');
+const taskTemplateRoutes = require('./routes/taskTemplates');
 
 const app = express();
 
@@ -26,6 +29,9 @@ app.use('/api/tasks', taskRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/subtasks', subtaskRoutes);
 app.use('/api/categories', categoryRoutes);
+app.use('/api/comments', commentRoutes);
+app.use('/api/shares', taskShareRoutes);
+app.use('/api/templates', taskTemplateRoutes);
 
 const PORT = process.env.PORT || 5000;
 
