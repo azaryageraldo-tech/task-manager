@@ -1,40 +1,25 @@
 const { DataTypes } = require('sequelize');
+const sequelize = require('../config/database');
 
-module.exports = (sequelize) => {
-  const Task = sequelize.define('Task', {
-    title: {
-      type: DataTypes.STRING,
-      allowNull: false
-    },
-    description: DataTypes.TEXT,
-    priority: {
-      type: DataTypes.STRING,
-      defaultValue: 'medium'
-    },
-    status: {
-      type: DataTypes.STRING,
-      defaultValue: 'pending'
-    },
-    deadline: DataTypes.DATE,
-    userId: {
-      type: DataTypes.INTEGER,
-      allowNull: false
-    }
-  });
+const Task = sequelize.define('Task', {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
+  },
+  title: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  description: DataTypes.TEXT,
+  status: {
+    type: DataTypes.STRING,
+    defaultValue: 'pending'
+  },
+  userId: {
+    type: DataTypes.INTEGER,
+    allowNull: false
+  }
+});
 
-  Task.associate = (models) => {
-    Task.belongsTo(models.User, {
-      foreignKey: 'userId',
-      onDelete: 'CASCADE'
-    });
-    Task.hasMany(models.Subtask, {
-      foreignKey: 'taskId'
-    });
-    Task.belongsToMany(models.Category, {
-      through: 'TaskCategories',
-      foreignKey: 'taskId'
-    });
-  };
-
-  return Task;
-};
+module.exports = Task;

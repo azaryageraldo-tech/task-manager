@@ -1,16 +1,17 @@
 const { Category, Task } = require('../models');
 const { Op } = require('sequelize');
+const Category = require('../models/Category');
 
 // Get all categories for the current user
 exports.getAllCategories = async (req, res) => {
   try {
     const categories = await Category.findAll({
-      where: { userId: req.user.id },
-      order: [['name', 'ASC']]
+      where: { userId: req.user.id }
     });
     res.json(categories);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('Get categories error:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
 
