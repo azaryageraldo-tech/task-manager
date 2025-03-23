@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const authMiddleware = require('../middleware/authMiddleware');
-const taskController = require('../controllers/taskController');
-const categoryController = require('../controllers/categoryController');
-const notificationController = require('../controllers/notificationController');
+const taskController = require('../controllers/taskcontroller');
+const categoryController = require('../controllers/categorycontroller');
+const notificationController = require('../controllers/notificationcontroller');
 
 // Protect all routes
 router.use(authMiddleware);
@@ -11,7 +11,7 @@ router.use(authMiddleware);
 // Tasks routes
 router.get('/tasks', taskController.getAllTasks);
 router.post('/tasks', taskController.createTask);
-router.get('/tasks/:id', taskController.getTask);
+router.get('/tasks/:id', taskController.getTaskById);
 router.put('/tasks/:id', taskController.updateTask);
 router.delete('/tasks/:id', taskController.deleteTask);
 

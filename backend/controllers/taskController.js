@@ -1,76 +1,90 @@
-const Task = require('../models/Task');
+const Task = require('../models/task');
+const { Op } = require('sequelize');
 
 exports.getAllTasks = async (req, res) => {
   try {
     const tasks = await Task.findAll({
-      where: { userId: req.user.id }
+      where: { userId: req.user.id },
+      include: ['category'],
+      order: [['createdAt', 'DESC']]
     });
     res.json(tasks);
   } catch (error) {
     console.error('Get tasks error:', error);
-    res.status(500).json({ message: 'Server error', error: error.message });
+    res.status(500).json({ message: 'Server error' });
   }
 };
 
-exports.getTaskById: async (req, res) => {
+exports.createTask = async (req, res) => {
   try {
+    const { title, description, status, priority, deadline, categoryId } = req.body;
+    const task = await Task.create({
+      title,
+      description,
+      status,
+      priority,
+      deadline,
+      categoryId,
+      userId: req.user.id
+    });
+    res.status(201).json(task);
+  } catch (error) {
+    console.error('Create task error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+exports.updateTask = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const [updated] = await Task.update(req.body, {
+      where: { id, userId: req.user.id }
+    });
+    if (!updated) {
+      return res.status(404).json({ message: 'Task not found' });
+    }
+    const task = await Task.findByPk(id);
+    res.json(task);
+  } catch (error) {
+    console.error('Update task error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+exports.deleteTask = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deleted = await Task.destroy({
+      where: { id, userId: req.user.id }
+    });
+    if (!deleted) {
+      return res.status(404).json({ message: 'Task not found' });
+    }
+    res.status(204).send();
+  } catch (error) {
+    console.error('Delete task error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+exports.getTaskById = async (req, res) => {
+  try {
+    const { id } = req.params;
     const task = await Task.findOne({
-      where: { 
-        id: req.params.id,
-        userId: req.user.id
-      }
+      where: { id, userId: req.user.id },
+      include: ['category']
     });
     if (!task) {
-      return res.status(404).json({ message: 'Tugas tidak ditemukan' });
+      return res.status(404).json({ message: 'Task not found' });
     }
     res.json(task);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('Get task by id error:', error);
+    res.status(500).json({ message: 'Server error' });
   }
 };
 
-exports.updateTask: async (req, res) => {
-  try {
-    const task = await Task.findOne({
-      where: { 
-        id: req.params.id,
-        userId: req.user.id
-      }
-    });
-    if (!task) {
-      return res.status(404).json({ message: 'Tugas tidak ditemukan' });
-    }
-    await task.update(req.body);
-    
-    if (req.body.deadline) {
-      await createDeadlineNotification(task);
-    }
-    
-    res.json(task);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-};
-
-exports.deleteTask: async (req, res) => {
-  try {
-    const task = await Task.findOne({
-      where: { 
-        id: req.params.id,
-        userId: req.user.id
-      }
-    });
-    if (!task) {
-      return res.status(404).json({ message: 'Tugas tidak ditemukan' });
-    }
-    await task.destroy();
-    res.json({ message: 'Tugas berhasil dihapus' });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-exports.getFilteredTasks: async (req, res) => {
+exports.getFilteredTasks = async (req, res) => { // Hapus tanda :
   try {
     const { priority, status, search, category, sortBy, order } = req.query;
     const whereClause = { userId: req.user.id };
@@ -103,7 +117,7 @@ exports.getFilteredTasks: async (req, res) => {
   }
 };
 
-exports.getUpcomingDeadlines: async (req, res) => {
+exports.getUpcomingDeadlines = async (req, res) => { // Hapus tanda :
   try {
     const sekarang = new Date();
     const tigaHariKedepan = new Date(sekarang.getTime() + (3 * 24 * 60 * 60 * 1000));
@@ -127,7 +141,7 @@ exports.getUpcomingDeadlines: async (req, res) => {
   }
 };
 
-exports.getTaskStats: async (req, res) => {
+exports.getTaskStats = async (req, res) => { // Hapus tanda :
   try {
     const totalTasks = await Task.count({ where: { userId: req.user.id } });
     const completedTasks = await Task.count({ 
@@ -156,4 +170,4 @@ exports.getTaskStats: async (req, res) => {
   }
 };
 
-module.exports = taskController;
+// Hapus baris module.exports = taskController karena sudah menggunakan exports.*

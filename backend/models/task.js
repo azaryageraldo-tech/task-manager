@@ -11,10 +11,26 @@ const Task = sequelize.define('Task', {
     type: DataTypes.STRING,
     allowNull: false
   },
-  description: DataTypes.TEXT,
+  description: {
+    type: DataTypes.TEXT
+  },
   status: {
-    type: DataTypes.STRING,
+    type: DataTypes.ENUM('pending', 'in_progress', 'completed'),
     defaultValue: 'pending'
+  },
+  priority: {
+    type: DataTypes.ENUM('low', 'medium', 'high'),
+    defaultValue: 'medium'
+  },
+  deadline: {
+    type: DataTypes.DATE
+  },
+  categoryId: {
+    type: DataTypes.INTEGER,
+    references: {
+      model: 'Categories',
+      key: 'id'
+    }
   },
   userId: {
     type: DataTypes.INTEGER,

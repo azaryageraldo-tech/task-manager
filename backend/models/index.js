@@ -3,30 +3,22 @@ const path = require('path');
 const Sequelize = require('sequelize');
 const sequelize = require('../config/database');
 
-const db = {};
+const Task = require('./task');
+const Category = require('./category'); // Perbaiki nama file menjadi lowercase
+const User = require('./user'); // Konsistensi dengan lowercase
 
-// Read all model files
-fs.readdirSync(__dirname)
-  .filter(file => {
-    return (
-      file.indexOf('.') !== 0 &&
-      file !== 'index.js' &&
-      file.slice(-3) === '.js'
-    );
-  })
-  .forEach(file => {
-    const model = require(path.join(__dirname, file));
-    db[model.name] = model;
-  });
+// Associations
+Task.belongsTo(Category, { foreignKey: 'categoryId', as: 'category' });
+Category.hasMany(Task, { foreignKey: 'categoryId' });
 
-// Associate models if associations exist
-Object.keys(db).forEach(modelName => {
-  if (db[modelName].associate) {
-    db[modelName].associate(db);
-  }
-});
+Task.belongsTo(User, { foreignKey: 'userId' });
+User.hasMany(Task, { foreignKey: 'userId' });
 
-db.sequelize = sequelize;
-db.Sequelize = Sequelize;
+Category.belongsTo(User, { foreignKey: 'userId' });
+User.hasMany(Category, { foreignKey: 'userId' });
 
-module.exports = db;
+module.exports = {
+  Task,
+  Category,
+  User
+};

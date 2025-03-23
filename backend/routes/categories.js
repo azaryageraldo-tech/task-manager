@@ -1,19 +1,15 @@
 const express = require('express');
 const router = express.Router();
-const categoryController = require('../controllers/categoryController');
-const auth = require('../middleware/auth');
+const categoryController = require('../controllers/categorycontroller');
+const authMiddleware = require('../middleware/authMiddleware');
 
-router.use(auth);
+// Apply auth middleware to all routes
+router.use(authMiddleware);
 
-// Category CRUD routes
+// Define routes
 router.get('/', categoryController.getAllCategories);
 router.post('/', categoryController.createCategory);
 router.put('/:id', categoryController.updateCategory);
 router.delete('/:id', categoryController.deleteCategory);
-
-// Task-Category relationship routes
-router.post('/task/:taskId/category/:categoryId', categoryController.addCategoryToTask);
-router.delete('/task/:taskId/category/:categoryId', categoryController.removeCategoryFromTask);
-router.get('/category/:categoryId/tasks', categoryController.getTasksByCategory);
 
 module.exports = router;

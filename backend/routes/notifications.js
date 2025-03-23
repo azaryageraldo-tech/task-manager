@@ -1,11 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const notificationController = require('../controllers/notificationController');
-const auth = require('../middleware/auth');
+const notificationController = require('../controllers/notificationcontroller');
+const authMiddleware = require('../middleware/authMiddleware');
 
-router.use(auth);
+router.use(authMiddleware);
 
 router.get('/', notificationController.getNotifications);
-router.put('/:id/read', notificationController.markAsRead);
+// Hapus route PUT yang tidak memiliki handler atau tambahkan handler yang sesuai
 
 module.exports = router;
