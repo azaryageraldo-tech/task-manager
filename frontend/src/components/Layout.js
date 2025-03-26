@@ -4,11 +4,12 @@ import { Box, Drawer, AppBar, Toolbar, List, Typography, Divider, IconButton, Li
 import { Menu as MenuIcon, Dashboard as DashboardIcon, Task as TaskIcon, Category as CategoryIcon, Notifications as NotificationsIcon, Logout as LogoutIcon } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
 import NotificationBadge from './NotificationBadge';
+import { Link } from 'react-router-dom';
 
 // Pindahkan drawerWidth ke dalam komponen
 const drawerWidth = 240;
 
-export default function Layout({ children }) {
+const Layout = ({ children }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -49,11 +50,11 @@ export default function Layout({ children }) {
       <Divider />
       <List>
         {menuItems.map((item) => (
+          // Replace ListItem with button prop to:
           <ListItem
-            button
-            key={item.text}
-            onClick={() => handleNavigation(item.path)}
-            selected={location.pathname === item.path}
+            component={Link}
+            to={item.path}
+            sx={{ textDecoration: 'none', color: 'inherit' }}
           >
             <ListItemIcon>
               {item.badge ? (
@@ -152,3 +153,5 @@ export default function Layout({ children }) {
     </Box>
   );
 }
+
+export default Layout;

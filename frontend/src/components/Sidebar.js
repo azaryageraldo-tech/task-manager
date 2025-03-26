@@ -38,22 +38,22 @@ const Sidebar = ({ open, width = 240 }) => {
     >
       <Box sx={{ overflow: 'auto', mt: 8 }}>
         <List>
+
+
           {menuItems.map((item) => (
-            <ListItem
-              key={item.text}
-              component={Link}
-              to={item.path}
-              sx={{
-                '&:hover': {
-                  backgroundColor: 'rgba(0, 0, 0, 0.04)',
-                }
-              }}
-            >
-              <ListItemIcon>{item.icon}</ListItemIcon>
-              <ListItemText primary={item.text} />
+            // Ganti ini
+            <ListItem button>
+            
+            // Menjadi ini
+            <ListItem>
+              <ListItemButton component={Link} to={item.path}>
+                <ListItemIcon>{item.icon}</ListItemIcon>
+                <ListItemText primary={item.text} />
+              </ListItemButton>
             </ListItem>
           ))}
         </List>
+
       </Box>
     </Drawer>
   );

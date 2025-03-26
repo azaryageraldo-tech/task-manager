@@ -1,9 +1,34 @@
 import { useState, useEffect } from 'react';
-import { Box, Grid, Typography, Button, Card, CardContent, CardActions, Chip, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, TextField, MenuItem, Tab, Tabs } from '@mui/material';
+import { 
+  Box, 
+  Grid, 
+  Typography, 
+  Button, 
+  Card, 
+  CardContent, 
+  CardActions, 
+  Chip, 
+  IconButton, 
+  Dialog, 
+  DialogTitle, 
+  DialogContent, 
+  DialogActions, 
+  TextField, 
+  MenuItem, 
+  Tab, 
+  Tabs,
+  Container
+} from '@mui/material';
 import { Add as AddIcon, Edit as EditIcon, Delete as DeleteIcon, Share as ShareIcon } from '@mui/icons-material';
 import { taskService } from '../services/taskService';
 import { categoryService } from '../services/categoryService';
 
+// Hapus duplikat import
+// import { Container, Typography, Button, Box } from '@mui/material';
+import TaskForm from '../components/TaskForm';
+import TaskList from '../components/TaskList';
+
+// Hapus komponen Tasks yang diduplikasi dan gunakan export default function Tasks
 export default function Tasks() {
   const [tasks, setTasks] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -23,14 +48,25 @@ export default function Tasks() {
 
   const fetchData = async () => {
     try {
-      const [tasksData, categoriesData] = await Promise.all([
+      console.log('Fetching tasks and categories...');
+      const [tasksResponse, categoriesResponse] = await Promise.all([
         taskService.getAllTasks(),
         categoryService.getAllCategories()
       ]);
-      setTasks(tasksData);
-      setCategories(categoriesData);
+      
+      console.log('Tasks response:', tasksResponse);
+      console.log('Categories response:', categoriesResponse);
+
+      if (tasksResponse?.data) {
+        setTasks(tasksResponse.data);
+      }
+      
+      if (categoriesResponse?.data) {
+        setCategories(categoriesResponse.data);
+      }
     } catch (error) {
       console.error('Error fetching data:', error);
+      alert('Failed to load data. Please refresh the page.');
     }
   };
 
@@ -40,7 +76,10 @@ export default function Tasks() {
 
   const handleCreateTask = async () => {
     try {
-      await taskService.createTask(taskInput);
+      console.log('Creating task with data:', taskInput);
+      const response = await taskService.createTask(taskInput);
+      console.log('Task created:', response.data);
+      
       setOpenDialog(false);
       setTaskInput({
         title: '',
@@ -50,9 +89,12 @@ export default function Tasks() {
         deadline: '',
         categoryId: ''
       });
-      fetchData();
+      
+      // Refresh data setelah create
+      await fetchData();
     } catch (error) {
       console.error('Error creating task:', error);
+      alert('Failed to create task. Please try again.');
     }
   };
 
@@ -118,67 +160,73 @@ export default function Tasks() {
       </Tabs>
 
       <Grid container spacing={3}>
-        {filteredTasks.map((task) => (
-          <Grid item xs={12} sm={6} md={4} key={task.id}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6">{task.title}</Typography>
-                <Typography color="textSecondary" sx={{ mb: 1 }}>
-                  {task.description}
-                </Typography>
-                <Box sx={{ mb: 1 }}>
-                  <Chip 
-                    label={task.priority}
-                    color={task.priority === 'high' ? 'error' : task.priority === 'medium' ? 'warning' : 'info'}
-                    size="small"
-                    sx={{ mr: 1 }}
-                  />
-                  <Chip 
-                    label={task.status}
-                    color={task.status === 'completed' ? 'success' : 'default'}
-                    size="small"
-                  />
-                  {task.Category && (
+        {Array.isArray(filteredTasks) && filteredTasks.length > 0 ? (
+          filteredTasks.map((task) => (
+            <Grid item xs={12} sm={6} md={4} key={task.id}>
+              <Card>
+                <CardContent>
+                  <Typography variant="h6">{task?.title || 'No Title'}</Typography>
+                  <Typography color="textSecondary" sx={{ mb: 1 }}>
+                    {task?.description || 'No Description'}
+                  </Typography>
+                  <Box sx={{ mb: 1 }}>
                     <Chip 
-                      label={task.Category.name}
-                      variant="outlined"
+                      label={task.priority}
+                      color={task.priority === 'high' ? 'error' : task.priority === 'medium' ? 'warning' : 'info'}
                       size="small"
-                      sx={{ ml: 1 }}
+                      sx={{ mr: 1 }}
                     />
-                  )}
-                </Box>
-                <Typography variant="caption" display="block" color="text.secondary">
-                  Deadline: {new Date(task.deadline).toLocaleDateString()}
-                </Typography>
-              </CardContent>
-              <CardActions>
-                <IconButton size="small" onClick={() => {
-                  setSelectedTask(task);
-                  setTaskInput({
-                    title: task.title,
-                    description: task.description,
-                    priority: task.priority,
-                    status: task.status,
-                    deadline: task.deadline,
-                    categoryId: task.categoryId
-                  });
-                  setOpenDialog(true);
-                }}>
-                  <EditIcon />
-                </IconButton>
-                <IconButton size="small" onClick={() => {
-                  setSelectedTask(task);
-                  setOpenShareDialog(true);
-                }}>
-                  <ShareIcon />
-                </IconButton>
-                <IconButton size="small" onClick={() => taskService.deleteTask(task.id).then(fetchData)}>
-                  <DeleteIcon />
-                </IconButton>
-              </CardActions>
-            </Card>
+                    <Chip 
+                      label={task.status}
+                      color={task.status === 'completed' ? 'success' : 'default'}
+                      size="small"
+                    />
+                    {task.Category && (
+                      <Chip 
+                        label={task.Category.name}
+                        variant="outlined"
+                        size="small"
+                        sx={{ ml: 1 }}
+                      />
+                    )}
+                  </Box>
+                  <Typography variant="caption" display="block" color="text.secondary">
+                    Deadline: {new Date(task.deadline).toLocaleDateString()}
+                  </Typography>
+                </CardContent>
+                <CardActions>
+                  <IconButton size="small" onClick={() => {
+                    setSelectedTask(task);
+                    setTaskInput({
+                      title: task.title,
+                      description: task.description,
+                      priority: task.priority,
+                      status: task.status,
+                      deadline: task.deadline,
+                      categoryId: task.categoryId
+                    });
+                    setOpenDialog(true);
+                  }}>
+                    <EditIcon />
+                  </IconButton>
+                  <IconButton size="small" onClick={() => {
+                    setSelectedTask(task);
+                    setOpenShareDialog(true);
+                  }}>
+                    <ShareIcon />
+                  </IconButton>
+                  <IconButton size="small" onClick={() => taskService.deleteTask(task.id).then(fetchData)}>
+                    <DeleteIcon />
+                  </IconButton>
+                </CardActions>
+              </Card>
+            </Grid>
+          ))
+        ) : (
+          <Grid item xs={12}>
+            <Typography align="center">No tasks found</Typography>
           </Grid>
-        ))}
+        )}
       </Grid>
 
       {/* Task Create/Edit Dialog */}
@@ -317,3 +365,5 @@ export default function Tasks() {
     </Box>
   );
 }
+
+// Hapus duplikat komponen Tasks dan export default Tasks

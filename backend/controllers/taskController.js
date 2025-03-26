@@ -1,36 +1,92 @@
 const Task = require('../models/task');
+const Category = require('../models/category');
 const { Op } = require('sequelize');
+
+exports.createTask = async (req, res) => {
+  try {
+    // Log input data
+    console.log('Mencoba membuat task baru');
+    console.log('Request body:', req.body);
+    console.log('User ID:', req.user?.id);
+
+    // Validasi input
+    if (!req.body.title) {
+      return res.status(400).json({ message: 'Judul task wajib diisi' });
+    }
+
+    // Buat task baru
+    const taskData = {
+      title: req.body.title,
+      description: req.body.description,
+      status: req.body.status || 'pending',
+      priority: req.body.priority || 'medium',
+      deadline: req.body.deadline,
+      categoryId: req.body.categoryId,
+      userId: req.user.id
+    };
+
+    console.log('Data task yang akan dibuat:', taskData);
+
+    const task = await Task.create(taskData);
+    console.log('Task berhasil dibuat:', task.id);
+
+    // Ambil task dengan data kategori
+    const fullTask = await Task.findOne({
+      where: { id: task.id },
+      include: ['category']
+    });
+
+    res.status(201).json(fullTask);
+  } catch (error) {
+    console.error('Error saat membuat task:', error);
+    res.status(500).json({
+      message: 'Gagal membuat task',
+      error: error.message
+    });
+  }
+};
 
 exports.getAllTasks = async (req, res) => {
   try {
+    console.log('Getting all tasks...');
+    
+    // Hapus filter userId untuk sementara
+    const tasks = await Task.findAll({
+      include: ['category'],
+      order: [['createdAt', 'DESC']]
+    });
+    
+    console.log('Tasks found:', tasks.length);
+    res.json(tasks);
+  } catch (error) {
+    console.error('Error detail:', error);
+    res.status(500).json({ 
+      message: 'Failed to fetch tasks',
+      error: error.message 
+    });
+  }
+};
+
+exports.getAllTasks = async (req, res) => {
+  try {
+    console.log('Getting all tasks...');
+    console.log('Request headers:', req.headers);
+    console.log('User data:', req.user);
+    
     const tasks = await Task.findAll({
       where: { userId: req.user.id },
       include: ['category'],
       order: [['createdAt', 'DESC']]
     });
+
+    console.log(`Found ${tasks.length} tasks`);
     res.json(tasks);
   } catch (error) {
-    console.error('Get tasks error:', error);
-    res.status(500).json({ message: 'Server error' });
-  }
-};
-
-exports.createTask = async (req, res) => {
-  try {
-    const { title, description, status, priority, deadline, categoryId } = req.body;
-    const task = await Task.create({
-      title,
-      description,
-      status,
-      priority,
-      deadline,
-      categoryId,
-      userId: req.user.id
+    console.error('Error detail:', error);
+    res.status(500).json({ 
+      message: 'Server error',
+      error: error.message 
     });
-    res.status(201).json(task);
-  } catch (error) {
-    console.error('Create task error:', error);
-    res.status(500).json({ message: 'Server error' });
   }
 };
 

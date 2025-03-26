@@ -8,11 +8,12 @@ const Task = sequelize.define('Task', {
     autoIncrement: true
   },
   title: {
-    type: DataTypes.STRING,
+    type: DataTypes.STRING(255),
     allowNull: false
   },
   description: {
-    type: DataTypes.TEXT
+    type: DataTypes.TEXT,
+    allowNull: true
   },
   status: {
     type: DataTypes.ENUM('pending', 'in_progress', 'completed'),
@@ -23,10 +24,12 @@ const Task = sequelize.define('Task', {
     defaultValue: 'medium'
   },
   deadline: {
-    type: DataTypes.DATE
+    type: DataTypes.DATE,
+    allowNull: true
   },
   categoryId: {
     type: DataTypes.INTEGER,
+    allowNull: true,
     references: {
       model: 'Categories',
       key: 'id'
@@ -36,6 +39,8 @@ const Task = sequelize.define('Task', {
     type: DataTypes.INTEGER,
     allowNull: false
   }
+}, {
+  timestamps: true
 });
 
 module.exports = Task;

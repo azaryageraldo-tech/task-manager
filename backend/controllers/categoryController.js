@@ -25,21 +25,46 @@ exports.getAllCategories = async (req, res) => {
 
 exports.createCategory = async (req, res) => {
   try {
+    console.log('Data kategori yang diterima:', req.body);
+    console.log('User ID:', req.user.id);
+
     const { name, color } = req.body;
     
     if (!name) {
-      return res.status(400).json({ message: 'Category name is required' });
+      return res.status(400).json({ message: 'Nama kategori harus diisi' });
     }
 
     const category = await Category.create({
       name,
-      color,
+      color: color || '#000000',
       userId: req.user.id
     });
+
+    console.log('Kategori berhasil dibuat:', category);
     res.status(201).json(category);
   } catch (error) {
-    console.error('Create category error:', error);
-    res.status(500).json({ message: 'Server error' });
+    console.error('Error membuat kategori:', error);
+    res.status(500).json({ 
+      message: 'Gagal membuat kategori',
+      error: error.message 
+    });
+  }
+};
+
+exports.getAllCategories = async (req, res) => {
+  try {
+    console.log('Mengambil kategori untuk user:', req.user.id);
+    
+    const categories = await Category.findAll({
+      where: { userId: req.user.id },
+      order: [['name', 'ASC']]
+    });
+
+    console.log('Jumlah kategori ditemukan:', categories.length);
+    res.json(categories);
+  } catch (error) {
+    console.error('Error mengambil kategori:', error);
+    res.status(500).json({ message: 'Gagal mengambil kategori' });
   }
 };
 
